@@ -69,8 +69,9 @@ public class ExternalTransactionService {
 		if (status.compareTo(WithdrawalState.PROCESSING) == 0) {
 			ExecutorService service = Executors.newSingleThreadExecutor();
 			service.execute(() -> {
-				while (status.compareTo(WithdrawalState.PROCESSING) != 0) {
+				while (status.compareTo(WithdrawalState.PROCESSING) == 0) {
 
+					System.out.println("Thread started.");
 					try {
 						Thread.sleep(10000);
 					} catch (InterruptedException e) {
@@ -89,7 +90,7 @@ public class ExternalTransactionService {
 					}
 					transaction.setStatus(status.name());
 					externalTransactionRepository.save(transaction);
-
+					System.out.println("Status updated : " + status.name());
 				}
 			});
 			service.shutdown();
@@ -100,8 +101,9 @@ public class ExternalTransactionService {
 	@Transactional
 	public ExternalTransaction transactionStatus(Long transactionId) {
 		return externalTransactionRepository.findById(transactionId)
-				.orElseThrow(() -> new TransactionNotExistException("Transaction with id : " + transactionId + " is not exists.",
-						ErrorCode.TRANSACTION_ERROR, HttpStatus.NOT_FOUND));
+				.orElseThrow(() -> new TransactionNotExistException(
+						"Transaction with id : " + transactionId + " is not exists.", ErrorCode.TRANSACTION_ERROR,
+						HttpStatus.NOT_FOUND));
 
 	}
 
